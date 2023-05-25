@@ -83,7 +83,25 @@ def generar_archivo_csv(nombre_archivo:str, lista:list):
         archivo.write("\n")
         #genero el salto de linea para que a cada encabezado le corresponda un valor 
 
-lista = leer_archivo_json("1 cuatrimestre\Para el examen\dt.json")
+def mayor_cantidad(lista_original:list, patron1, patron2)->list:
+    lista = lista_original[:]
+    if(len(lista)<=1):
+        return lista
+    else:
+        indice = 0
+        mayor = lista[indice][patron1][patron2]
+        for elemento in lista:
+            
+            elemento = elemento[patron1][patron2]
+            if(elemento > mayor):
+                mayor_indice = indice
+                mayor = elemento
+            
+            indice +=1
+
+    return mayor_indice
+
+lista = leer_archivo_json("Para el examen\dt.json")
 flag_while = True
 flag_2 = False
 
@@ -93,7 +111,10 @@ while (flag_while == True):
     print("1) Mostrar la lista de todos los jugadores del Dream Team")
     print("2) Seleccionar un jugador por su índice y mostrar sus estadísticas completas")
     print("3) Guardar las estadísticas de ese jugador en un archivo CSV")
-    print("4) Buscar un jugador y ver sus logros")
+    print("4) ----Buscar un jugador y ver sus logros")
+    print("5) Promedio de puntos por partido del Dream Team")
+    print("6) ---Miembro del Salón de la Fama del Baloncesto")
+    print("7) Jugador con la mayor cantidad de rebotes totales")
     print("0) Salir")
 
     respuesta = input("Ingrese el punto a probar con el numero indicado\n")
@@ -143,7 +164,7 @@ while (flag_while == True):
 
     if(respuesta == 3):
         if(flag_2 == True):
-            generar_archivo_csv("1 cuatrimestre\Para el examen\{0}.csv".format(nombre_jugador), lista_csv)
+            generar_archivo_csv("Para el examen\{0}.csv".format(nombre_jugador), lista_csv)
             #solamente si el paso 2 se ejecuto voy a poder hacer el 3. Mediante el nombre del jugador que eligio
             #y la lista csv cargada con los valores de las claves del dicionario estadisticas voy a generar un csv 
 
@@ -151,8 +172,42 @@ while (flag_while == True):
             print("Debe realizar el paso 2 primero")
     
     if(respuesta == 4):
+        #ingreso el nombre del jugador, recorro la lista con un for y tengo que buscar los jugadores que tengan un 
+        #nombre que coincida con el nombre ingresado y luego mostrar el logro de cada uno de los que coincidio
+        # nombre_jugador_ingresado = input("Ingrese el nombre del jugador para ver sus logros\n")
+        # nombre_jugador_ingresado = nombre_jugador_ingresado.capitalize()
+        # patron = r"{0}+".format(nombre_jugador_ingresado)
+        # lista_asd = []
+        # for jugador in lista:
+        #     #print(jugador["nombre"])
+        #     patron = re.search(patron, jugador["nombre"],re.IGNORECASE)
+        #     # if(patron):
+        #     #     print("entro")
+        #     # else: 
+        #     #     pass    
+        #     if patron == True:
+        #         lista_asd.append(jugador["nombre"])
+        # print(lista_asd)
         pass
-    
-    
+
+    if(respuesta == 5):
+        acumulador = 0
+        promedio = 0
+        for diccionario in lista:
+            for clave,valor in diccionario["estadisticas"].items():
+                if(clave == "promedio_puntos_por_partido"):
+                    acumulador += valor
+        promedio = acumulador / len(lista)
+        promedio = round(promedio, 2)
+        print(promedio)
+
+    if(respuesta == 7):
+        patron1 = "estadisticas"
+        patron2 = "rebotes_totales"
+        respuesta = mayor_cantidad(lista, patron1, patron2)
+        print("El jugador es: {0}\tRebotes totales: {1}".format(lista[respuesta]["nombre"], lista[respuesta][patron1][patron2]))
+
+
+
     if(respuesta == 0):
         flag_while = False
