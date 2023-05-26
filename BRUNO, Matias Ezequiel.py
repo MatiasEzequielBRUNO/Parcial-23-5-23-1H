@@ -101,6 +101,23 @@ def mayor_cantidad(lista_original:list, patron1, patron2)->list:
 
     return mayor_indice
 
+def promedio_mayor_que_valor_ingresado (numero:float, patron1, patron2)->list:
+    lista_promedio = []
+    indice = 0
+    mayor = numero
+    for elemento in lista:
+        
+        elemento = elemento[patron1][patron2]
+        if(elemento > mayor):
+            lista_promedio.append(indice)
+            
+        indice +=1
+    
+    return lista_promedio
+
+
+
+
 lista = leer_archivo_json("Para el examen\dt.json")
 flag_while = True
 flag_2 = False
@@ -115,6 +132,18 @@ while (flag_while == True):
     print("5) Promedio de puntos por partido del Dream Team")
     print("6) ---Miembro del Salón de la Fama del Baloncesto")
     print("7) Jugador con la mayor cantidad de rebotes totales")
+    print("8) Jugador con la mayor porcentaje de tiros de campo")
+    print("9) Jugador con la mayor cantidad de asistencias totales")
+    print("10) Ingresar un valor y mostrar los jugadores que han promediado más puntos por partido que ese valor")
+    print("11) Ingresar un valor y mostrar los jugadores que han promediado más rebotes por partido que ese valor")
+    print("12) Ingresar un valor y mostrar los jugadores que han promediado más asistencias por partido que ese valor")
+    print("13) Jugador con la mayor cantidad de robos totales")
+    print("14) Jugador con la mayor cantidad de bloqueos totales")
+    print("15) Ingresar un valor y mostrar los jugadores que hayan tenido un porcentaje de tiros libres superior a ese valor")
+
+    print("18) Ingresar un valor y mostrar los jugadores que hayan tenido un porcentaje de tiros triples superior a ese valor")
+    print("19) Jugador con la mayor cantidad de bloqueos totales")
+
     print("0) Salir")
 
     respuesta = input("Ingrese el punto a probar con el numero indicado\n")
@@ -206,8 +235,86 @@ while (flag_while == True):
         patron2 = "rebotes_totales"
         respuesta = mayor_cantidad(lista, patron1, patron2)
         print("El jugador es: {0}\tRebotes totales: {1}".format(lista[respuesta]["nombre"], lista[respuesta][patron1][patron2]))
+    
+    if(respuesta == 8):
+        patron1 = "estadisticas"
+        patron2 = "porcentaje_tiros_de_campo"
+        respuesta = mayor_cantidad(lista, patron1, patron2)
+        print("El jugador es: {0}\tPorcentaje de tiros de campo: %{1}".format(lista[respuesta]["nombre"], lista[respuesta][patron1][patron2]))
 
+    if(respuesta == 9):
+        patron1 = "estadisticas"
+        patron2 = "asistencias_totales"
+        respuesta = mayor_cantidad(lista, patron1, patron2)
+        print("El jugador es: {0}\tAsistencias totales: {1}".format(lista[respuesta]["nombre"], lista[respuesta][patron1][patron2]))
 
+    if(respuesta == 10):
+        numero = input("Ingrese un promedio\n")
+        numero = float(numero)
+        patron1 = "estadisticas"
+        patron2 = "promedio_puntos_por_partido"
+        respuesta = promedio_mayor_que_valor_ingresado(numero, patron1, patron2)
+        
+        for indice in respuesta:
+            print("Jugador: {0}\tPromedio: {1}".format(lista[indice]["nombre"], lista[indice][patron1][patron2]))
+    
+    if(respuesta == 11):
+        numero = input("Ingrese un promedio\n")
+        numero = float(numero)
+        patron1 = "estadisticas"
+        patron2 = "promedio_rebotes_por_partido"
+        respuesta = promedio_mayor_que_valor_ingresado(numero, patron1, patron2)
+        
+        for indice in respuesta:
+            print("Jugador: {0}\tPromedio: {1}".format(lista[indice]["nombre"], lista[indice][patron1][patron2]))
+    
+    if(respuesta == 12):
+        numero = input("Ingrese un promedio\n")
+        numero = float(numero)
+        patron1 = "estadisticas"
+        patron2 = "promedio_asistencias_por_partido"
+        respuesta = promedio_mayor_que_valor_ingresado(numero, patron1, patron2)
+        
+        for indice in respuesta:
+            print("Jugador: {0}\tPromedio: {1}".format(lista[indice]["nombre"], lista[indice][patron1][patron2]))
+
+    if(respuesta == 13):
+        patron1 = "estadisticas"
+        patron2 = "robos_totales"
+        respuesta = mayor_cantidad(lista, patron1, patron2)
+        print("El jugador es: {0}\tRobos totales: {1}".format(lista[respuesta]["nombre"], lista[respuesta][patron1][patron2]))
+
+    if(respuesta == 14):
+        patron1 = "estadisticas"
+        patron2 = "bloqueos_totales"
+        respuesta = mayor_cantidad(lista, patron1, patron2)
+        print("El jugador es: {0}\tBloqueos totales: {1}".format(lista[respuesta]["nombre"], lista[respuesta][patron1][patron2]))
+    
+    if(respuesta == 15):
+        numero = input("Ingrese un porcentaje\n")
+        numero = float(numero)
+        patron1 = "estadisticas"
+        patron2 = "porcentaje_tiros_libres"
+        respuesta = promedio_mayor_que_valor_ingresado(numero, patron1, patron2)
+        
+        for indice in respuesta:
+            print("Jugador: {0}\t %{1}".format(lista[indice]["nombre"], lista[indice][patron1][patron2]))
+
+    if(respuesta == 18):
+        numero = input("Ingrese un porcentaje\n")
+        numero = float(numero)
+        patron1 = "estadisticas"
+        patron2 = "porcentaje_tiros_triples"
+        respuesta = promedio_mayor_que_valor_ingresado(numero, patron1, patron2)
+        
+        for indice in respuesta:
+            print("Jugador: {0}\t%{1}".format(lista[indice]["nombre"], lista[indice][patron1][patron2]))
+
+    if(respuesta == 19):
+        patron1 = "estadisticas"
+        patron2 = "temporadas"
+        respuesta = mayor_cantidad(lista, patron1, patron2)
+        print("El jugador es: {0}\tTemporadas: {1}".format(lista[respuesta]["nombre"], lista[respuesta][patron1][patron2]))
 
     if(respuesta == 0):
         flag_while = False
