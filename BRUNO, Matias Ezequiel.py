@@ -3,7 +3,7 @@ import json
 import re
 #importo la biblioteca regex
 #from nombre_archivo import nombre_funcion
-
+from Funciones_Main import leer_archivo_json
 def leer_archivo_json(nombre_archivo:str) -> list:
     lista = []
     with open(nombre_archivo,"r", encoding = "utf-8") as archivo:
@@ -146,17 +146,31 @@ def mayor_cantidad(lista_original:list, clave1, clave2)->list:
         return lista
     else:
         indice = 0
-        mayor = lista[indice][clave1][clave2]
-        for elemento in lista:
+        mayor_indice = 0
+        if(clave2 == None):
+            mayor = len(lista[indice][clave1])
+            for elemento in lista:
+                elemento = len(elemento[clave1])     
+                if(elemento > mayor):
+                    mayor_indice = indice
+                    mayor = elemento
+                
+                indice +=1
             
-            elemento = elemento[clave1][clave2]
-            if(elemento > mayor):
-                mayor_indice = indice
-                mayor = elemento
-            
-            indice +=1
-
-    return mayor_indice
+            return mayor_indice
+           
+        else:    
+            mayor = lista[indice][clave1][clave2]
+            for elemento in lista:
+                
+                elemento = elemento[clave1][clave2]
+                if(elemento > mayor):
+                    mayor_indice = indice
+                    mayor = elemento
+                
+                indice +=1
+            return mayor_indice
+        
 
 
 def comparador_mayor_al_valor_ingresado(lista:list, numero:float, clave1, clave2)->list:
@@ -208,27 +222,27 @@ flag_2 = False
 while (flag_while_menu == True):
     flag = True
     print("\nMenu de opciones:")
-    #print("1) Mostrar la lista de todos los jugadores del Dream Team")
-    #print("2) Seleccionar un jugador por su índice y mostrar sus estadísticas completas")
-    #print("3) Guardar las estadísticas de ese jugador en un archivo CSV")
-    #print("4) Buscar un jugador y ver sus logros")
-    #print("5) Promedio de puntos por partido del Dream Team")
-    #print("6) Ver si el jugador es miembro del Salón de la Fama del Baloncesto")
-    #print("7) Jugador con la mayor cantidad de rebotes totales")
-    #print("8) Jugador con la mayor porcentaje de tiros de campo")
-    #print("9) Jugador con la mayor cantidad de asistencias totales")
-    #print("10) Ingresar un valor y mostrar los jugadores que han promediado más puntos por partido que ese valor")
-    #print("11) Ingresar un valor y mostrar los jugadores que han promediado más rebotes por partido que ese valor")
-    #print("12) Ingresar un valor y mostrar los jugadores que han promediado más asistencias por partido que ese valor")
-    #print("13) Jugador con la mayor cantidad de robos totales")
-    #print("14) Jugador con la mayor cantidad de bloqueos totales")
-    #print("15) Ingresar un valor y mostrar los jugadores que hayan tenido un porcentaje de tiros libres superior a ese valor")
-    #print("16) Mostrar el promedio de puntos por partido del equipo excluyendo al jugador con la menor cantidad de puntos por partido")
-    print("17) ----Mostrar el jugador con la mayor cantidad de logros obtenidos")
-    #print("18) Ingresar un valor y mostrar los jugadores que hayan tenido un porcentaje de tiros triples superior a ese valor")
-    #print("19) Jugador con la mayor cantidad de temporadas jugadas")
-    #print("20) Ingresar un valor y mostrar los jugadores, ordenados por posición en la cancha, que hayan tenido un porcentaje de tiros de campo superior a ese valor")
-    #print("23) Calcular de cada jugador cuál es su posición en cada uno de los siguientes ranking: Puntos, Rebotes, Asistencias y Robos, y exportar a csv")
+    print("1) Mostrar la lista de todos los jugadores del Dream Team")
+    print("2) Seleccionar un jugador por su índice y mostrar sus estadísticas completas")
+    print("3) Guardar las estadísticas de ese jugador en un archivo CSV")
+    print("4) Buscar un jugador y ver sus logros")
+    print("5) Promedio de puntos por partido del Dream Team")
+    print("6) Ver si el jugador es miembro del Salón de la Fama del Baloncesto")
+    print("7) Jugador con la mayor cantidad de rebotes totales")
+    print("8) Jugador con la mayor porcentaje de tiros de campo")
+    print("9) Jugador con la mayor cantidad de asistencias totales")
+    print("10) Ingresar un valor y mostrar los jugadores que han promediado más puntos por partido que ese valor")
+    print("11) Ingresar un valor y mostrar los jugadores que han promediado más rebotes por partido que ese valor")
+    print("12) Ingresar un valor y mostrar los jugadores que han promediado más asistencias por partido que ese valor")
+    print("13) Jugador con la mayor cantidad de robos totales")
+    print("14) Jugador con la mayor cantidad de bloqueos totales")
+    print("15) Ingresar un valor y mostrar los jugadores que hayan tenido un porcentaje de tiros libres superior a ese valor")
+    print("16) Mostrar el promedio de puntos por partido del equipo excluyendo al jugador con la menor cantidad de puntos por partido")
+    print("17) Mostrar el jugador con la mayor cantidad de logros obtenidos")
+    print("18) Ingresar un valor y mostrar los jugadores que hayan tenido un porcentaje de tiros triples superior a ese valor")
+    print("19) Jugador con la mayor cantidad de temporadas jugadas")
+    print("20) Ingresar un valor y mostrar los jugadores, ordenados por posición en la cancha, que hayan tenido un porcentaje de tiros de campo superior a ese valor")
+    print("23) Calcular de cada jugador cuál es su posición en cada uno de los siguientes ranking: Puntos, Rebotes, Asistencias y Robos, y exportar a csv")
     print("0) Salir")
 
     opcion = input("Ingrese el punto a probar con el numero indicado\n")
@@ -427,6 +441,15 @@ while (flag_while_menu == True):
         for diccionario in lista_jugadores_ordenada:
             print("{0}: \t\tPromedio: {1}".format(diccionario["nombre"].capitalize(), diccionario[clave1][clave2]))
 
+    if(opcion == 17):
+        clave1 = "logros"
+        clave2 = None
+        indice = mayor_cantidad(lista_jugadores, clave1, clave2)
+        cantidad_de_logros = len(lista_jugadores[indice][clave1])
+        jugador = lista_jugadores[indice]["nombre"]
+        print("El jugador con mas logros es: {0}\tCon {1} logros".format(jugador, cantidad_de_logros))
+        for logros in lista_jugadores[indice][clave1]:
+            print(logros) 
 
     if(opcion == 18):
         numero = input("Ingrese un porcentaje\n")
