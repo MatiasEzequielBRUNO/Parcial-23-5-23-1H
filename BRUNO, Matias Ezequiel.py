@@ -2,10 +2,11 @@ import json
 ##importa la biblioteca json 
 import re
 #importo la biblioteca regex
+#from nombre_archivo import nombre_funcion
 
 def leer_archivo_json(nombre_archivo:str) -> list:
     lista = []
-    with open(nombre_archivo,"r") as archivo:
+    with open(nombre_archivo,"r", encoding = "utf-8") as archivo:
         #abro el archivo en modo "r"read (lectura) para leerlo y en este caso copiar los datos
         #uso la sentencia with para que el interprete se encargue de cerrarlo automaticamente 
         #asi no depende de que yo haga el close para que se guarde todo
@@ -18,6 +19,7 @@ def leer_archivo_json(nombre_archivo:str) -> list:
         #asi cargo la lista que esta dentro del diccionario a la lista que voy a utilizar
 
     return lista
+
 
 def validar_menu (respuesta):
     #esta funcion valida que la opcion ignresada solo sea un numero de los que se muestan en el menu
@@ -35,8 +37,9 @@ def validar_menu (respuesta):
         flag = True
         return flag
 
+
 def validar_indice (indice:str, lista:list):
-    patron = r"[1-9]+"
+    patron = r"[1-9]{1}$|10|11|12"
     patron = re.match(patron, indice)
     #busco las condiciones del patron dentro del indice
 
@@ -51,7 +54,23 @@ def validar_indice (indice:str, lista:list):
         flag = True
         return flag
 
-def generar_archivo_csv(nombre_archivo:str, lista:list):
+
+def validar_0_a_100 (numero:str):   #ver como validar con coma
+    patron = r"^(100(\.0{1,2})?|[0-9]{1,2}(\.[0-9]{1,2})?)$"
+    patron = re.match(patron, numero)
+    #busco las condiciones del patron dentro del indice
+
+    if(patron):
+        #si el patron se cumple el flag se torna false y entonces no entra al while que esta en el menu
+        numero = float(numero)    
+        flag = False
+        return  flag
+    else: 
+        flag = True
+        return flag
+
+
+def generar_archivo_csv(nombre_archivo:str, lista_valores:list, lista_ecabezados:list):
     #le paso por parametros el nombre o la ruta de donde va a guardar los datos para generar el csv
     #y tambien le paso la lista de donde voy a tomar los datos
 
@@ -61,19 +80,19 @@ def generar_archivo_csv(nombre_archivo:str, lista:list):
         #asi no depende de que yo haga el close para que se guarde todo
         #y lo voy a llamar "archivo" 
         
-        for indice in range(len(lista_aux)):
-            #recorro la lista_aux que hice previamente ne el punto 2 para generar la primera linea con los encabezados 
-            texto_linea = "{0}, ".format(lista_aux[indice]).capitalize()                             
+        for indice in range(len(lista_ecabezados)):
+            #recorro la lista_ecabezados que hice previamente ne el punto 2 para generar la primera linea con los encabezados 
+            texto_linea = "{0}, ".format(lista_ecabezados[indice]).capitalize()                             
             #voy a crear la linea de texto con todos los elementos que la integran para formar el encabezado
             #en este caso son todos strings entonces no los tengo que castear pero hago que todos inicien con mayuscula
             archivo.write(texto_linea)
             #de esta manera en el archivo cargo linea a linea lo que fui generando
-        archivo.write("\n")
+        #archivo.write("\n")
         #este ultimo write es para generar el salto de linea y asi separar el encabezado 
 
-        for indice in range(len(lista)):
+        for indice in range(len(lista_valores)):
             #recorro la lista que recibi por parametro
-            texto_linea = str("{0}, ".format(lista[indice]))
+            texto_linea = str("{0}, ".format(lista_valores[indice]))
             #voy a crear la linea de texto con todos los elementos que la integran para formar el encabezado
             #en este caso NO son todos strings entonces los tengo que castear pero hago que todos inicien con
             # mayuscula debido a que tengo el nombrecon el resto no hay problema porque son numeros, 
@@ -83,16 +102,54 @@ def generar_archivo_csv(nombre_archivo:str, lista:list):
         archivo.write("\n")
         #genero el salto de linea para que a cada encabezado le corresponda un valor 
 
-def mayor_cantidad(lista_original:list, patron1, patron2)->list:
+
+def calculador_promedio (lista:list, clave1:str, clave2:str):
+    lista_ingresada = lista[:]
+    acumulador = 0
+    promedio = 0
+    for diccionario in lista_ingresada:
+        for clave,valor in diccionario[clave1].items():
+            if(clave == clave2):
+                acumulador += valor
+    promedio = acumulador / len(lista_ingresada)
+    promedio = round(promedio, 2)
+    return promedio
+
+
+def ordenador_ascendente(lista:list, clave1:str, clave2:str)->list:
+
+    lista_ingresada = lista[:]
+    rango_a = len(lista_ingresada)
+    flag_swap = True
+
+    if (clave2 == None):
+        lista_ingresada = sorted(lista_ingresada, key = lambda x : x[clave1]) #ANDA FLAMA PERO IMPORTANTISIMO ACLARAR QUE ES ESTO
+
+        return lista_ingresada
+
+    else: 
+        while(flag_swap):
+            flag_swap = False
+            rango_a = rango_a - 1
+
+            for indice_A in range(rango_a):
+                if  lista_ingresada[indice_A][clave1][clave2] > lista_ingresada[indice_A+1][clave1][clave2]:
+                    lista_ingresada[indice_A],lista_ingresada[indice_A+1] = lista_ingresada[indice_A+1],lista_ingresada[indice_A]
+                    flag_swap = True
+
+    return lista_ingresada
+
+
+def mayor_cantidad(lista_original:list, clave1, clave2)->list:
     lista = lista_original[:]
     if(len(lista)<=1):
         return lista
     else:
         indice = 0
-        mayor = lista[indice][patron1][patron2]
+        mayor = lista[indice][clave1][clave2]
         for elemento in lista:
             
-            elemento = elemento[patron1][patron2]
+            elemento = elemento[clave1][clave2]
             if(elemento > mayor):
                 mayor_indice = indice
                 mayor = elemento
@@ -101,13 +158,15 @@ def mayor_cantidad(lista_original:list, patron1, patron2)->list:
 
     return mayor_indice
 
-def promedio_mayor_que_valor_ingresado (numero:float, patron1, patron2)->list:
+
+def comparador_mayor_al_valor_ingresado(lista:list, numero:float, clave1, clave2)->list:
+    lista_ingresada = lista[:]
     lista_promedio = []
     indice = 0
     mayor = numero
-    for elemento in lista:
+    for elemento in lista_ingresada:
         
-        elemento = elemento[patron1][patron2]
+        elemento = elemento[clave1][clave2]
         if(elemento > mayor):
             lista_promedio.append(indice)
             
@@ -116,205 +175,327 @@ def promedio_mayor_que_valor_ingresado (numero:float, patron1, patron2)->list:
     return lista_promedio
 
 
+def ranking_estadisticas (lista:list, clave:str, valor)->int:
+    for diccionario in lista:
+        if(diccionario[clave] == valor):
+            posicion = lista.index(diccionario)+1
+            return posicion
 
 
-lista = leer_archivo_json("Para el examen\dt.json")
-flag_while = True
+def buscar_valores(lista:list, palabra:str, clave1):
+    patron = r".*{0}.*".format(palabra)
+    lista_aux = []
+    for elemento in lista:
+        buscar_valor = re.search(patron, elemento[clave1], re.IGNORECASE)
+        if(buscar_valor):
+            lista_aux.append(elemento)
+    return lista_aux
+
+
+def validar_palabras (palabra:str):
+    flag = True
+    if palabra.isalpha():
+        flag = False
+    return flag
+
+
+#############################################################################################################################
+
+lista_jugadores = leer_archivo_json("Para el examen\dt.json")
+flag_while_menu = True
 flag_2 = False
 
-while (flag_while == True):
+while (flag_while_menu == True):
     flag = True
     print("\nMenu de opciones:")
-    print("1) Mostrar la lista de todos los jugadores del Dream Team")
-    print("2) Seleccionar un jugador por su índice y mostrar sus estadísticas completas")
-    print("3) Guardar las estadísticas de ese jugador en un archivo CSV")
-    print("4) ----Buscar un jugador y ver sus logros")
-    print("5) Promedio de puntos por partido del Dream Team")
-    print("6) ---Miembro del Salón de la Fama del Baloncesto")
-    print("7) Jugador con la mayor cantidad de rebotes totales")
-    print("8) Jugador con la mayor porcentaje de tiros de campo")
-    print("9) Jugador con la mayor cantidad de asistencias totales")
-    print("10) Ingresar un valor y mostrar los jugadores que han promediado más puntos por partido que ese valor")
-    print("11) Ingresar un valor y mostrar los jugadores que han promediado más rebotes por partido que ese valor")
-    print("12) Ingresar un valor y mostrar los jugadores que han promediado más asistencias por partido que ese valor")
-    print("13) Jugador con la mayor cantidad de robos totales")
-    print("14) Jugador con la mayor cantidad de bloqueos totales")
-    print("15) Ingresar un valor y mostrar los jugadores que hayan tenido un porcentaje de tiros libres superior a ese valor")
-
-    print("18) Ingresar un valor y mostrar los jugadores que hayan tenido un porcentaje de tiros triples superior a ese valor")
-    print("19) Jugador con la mayor cantidad de bloqueos totales")
-
+    #print("1) Mostrar la lista de todos los jugadores del Dream Team")
+    #print("2) Seleccionar un jugador por su índice y mostrar sus estadísticas completas")
+    #print("3) Guardar las estadísticas de ese jugador en un archivo CSV")
+    #print("4) Buscar un jugador y ver sus logros")
+    #print("5) Promedio de puntos por partido del Dream Team")
+    #print("6) Ver si el jugador es miembro del Salón de la Fama del Baloncesto")
+    #print("7) Jugador con la mayor cantidad de rebotes totales")
+    #print("8) Jugador con la mayor porcentaje de tiros de campo")
+    #print("9) Jugador con la mayor cantidad de asistencias totales")
+    #print("10) Ingresar un valor y mostrar los jugadores que han promediado más puntos por partido que ese valor")
+    #print("11) Ingresar un valor y mostrar los jugadores que han promediado más rebotes por partido que ese valor")
+    #print("12) Ingresar un valor y mostrar los jugadores que han promediado más asistencias por partido que ese valor")
+    #print("13) Jugador con la mayor cantidad de robos totales")
+    #print("14) Jugador con la mayor cantidad de bloqueos totales")
+    #print("15) Ingresar un valor y mostrar los jugadores que hayan tenido un porcentaje de tiros libres superior a ese valor")
+    #print("16) Mostrar el promedio de puntos por partido del equipo excluyendo al jugador con la menor cantidad de puntos por partido")
+    print("17) ----Mostrar el jugador con la mayor cantidad de logros obtenidos")
+    #print("18) Ingresar un valor y mostrar los jugadores que hayan tenido un porcentaje de tiros triples superior a ese valor")
+    #print("19) Jugador con la mayor cantidad de temporadas jugadas")
+    #print("20) Ingresar un valor y mostrar los jugadores, ordenados por posición en la cancha, que hayan tenido un porcentaje de tiros de campo superior a ese valor")
+    #print("23) Calcular de cada jugador cuál es su posición en cada uno de los siguientes ranking: Puntos, Rebotes, Asistencias y Robos, y exportar a csv")
     print("0) Salir")
 
-    respuesta = input("Ingrese el punto a probar con el numero indicado\n")
-    flag = validar_menu(respuesta)
+    opcion = input("Ingrese el punto a probar con el numero indicado\n")
+    flag = validar_menu(opcion)
 
     while(flag):
-        respuesta = input("Ingrese nuevamente el punto a probar con el numero indicado\n")
-        flag = validar_menu(respuesta)
+        opcion = input("Ingrese nuevamente el punto a probar con el numero indicado\n")
+        flag = validar_menu(opcion)
     
-    respuesta = int(respuesta)
+    opcion = int(opcion)
 
-    if(respuesta == 1):
-        for diccionario in lista:
+    if(opcion == 1):
+        for diccionario in lista_jugadores:
             print("{0} - {1}".format(diccionario["nombre"], diccionario["posicion"]))
 
-    if(respuesta == 2):
+    if(opcion == 2):
         flag_2 = True
-        lista_csv = []
-        lista_aux = []
+        lista_csv_valores_2 = []
+        lista_aux_2 = []
 
-        for diccionario in lista:
-            print("{0}): {1}".format(lista.index(diccionario)+1, diccionario["nombre"]))
+        for diccionario in lista_jugadores:
+            print("{0}) {1}".format(lista_jugadores.index(diccionario)+1, diccionario["nombre"]))
             #recorro la lista y muestro el indice de cada diccionario y el valor de la clave nombre de cada uno
 
         indice = input("Seleccione el indice el indice del jugador\n")
-        flag = validar_indice(indice, lista)
+        flag = validar_indice(indice, lista_jugadores)
         while(flag):
             indice = input("Ingrese nuevamente el indice del jugador\n")
-            flag = validar_indice(indice, lista)
+            flag = validar_indice(indice, lista_jugadores)
         #una vez que se selecciona el jugador mediante el indice de la lista y es valido
         indice = int(indice)-1
 
-        diccionario_jugador = lista[indice]
+        diccionario_jugador = lista_jugadores[indice]
         nombre_jugador = (diccionario_jugador["nombre"])
         print("{0}".format(nombre_jugador))
-        lista_csv.append(nombre_jugador)
-        lista_aux.append("nombre")
+        lista_csv_valores_2.append("\n{0}".format(nombre_jugador))
+        lista_aux_2.append("nombre")
         #aprovecho que ya estoy en ese diccionario y agrego el nombre a la lista csv 
 
         for clave, valor in diccionario_jugador["estadisticas"].items():
             print("{0}:  {1}".format(clave, valor))
-            lista_aux.append(clave)
-            lista_csv.append(valor)
+            lista_aux_2.append(clave)
+            lista_csv_valores_2.append(valor)
         #y despues imprimo por pantalla las estadisticas del jugador, como ya estoy recorriendo el diccionario
         #que voy a encesitar en el punto 3, aprovecho y voy cargando los valores en la lista csv y las claves
         #en la lista aux que me van a servir para armar el encabezado del documento csv
-
-    if(respuesta == 3):
+        
+    if(opcion == 3):
         if(flag_2 == True):
-            generar_archivo_csv("Para el examen\{0}.csv".format(nombre_jugador), lista_csv)
+            generar_archivo_csv("Para el examen\{0}.csv".format(nombre_jugador), lista_csv_valores_2, lista_aux_2)
             #solamente si el paso 2 se ejecuto voy a poder hacer el 3. Mediante el nombre del jugador que eligio
             #y la lista csv cargada con los valores de las claves del dicionario estadisticas voy a generar un csv 
 
         else:
             print("Debe realizar el paso 2 primero")
     
-    if(respuesta == 4):
+    if(opcion == 4):
         #ingreso el nombre del jugador, recorro la lista con un for y tengo que buscar los jugadores que tengan un 
         #nombre que coincida con el nombre ingresado y luego mostrar el logro de cada uno de los que coincidio
-        # nombre_jugador_ingresado = input("Ingrese el nombre del jugador para ver sus logros\n")
-        # nombre_jugador_ingresado = nombre_jugador_ingresado.capitalize()
-        # patron = r"{0}+".format(nombre_jugador_ingresado)
-        # lista_asd = []
-        # for jugador in lista:
-        #     #print(jugador["nombre"])
-        #     patron = re.search(patron, jugador["nombre"],re.IGNORECASE)
-        #     # if(patron):
-        #     #     print("entro")
-        #     # else: 
-        #     #     pass    
-        #     if patron == True:
-        #         lista_asd.append(jugador["nombre"])
-        # print(lista_asd)
-        pass
+        nombre_jugador_ingresado = input("Ingrese el nombre del jugador para ver sus logros\n")
+        flag = validar_palabras(nombre_jugador_ingresado)
+        while (flag):
+            nombre_jugador_ingresado = input("Ingrese nuevamente el nombre del jugador para ver sus logros\n")
+            flag = validar_palabras(nombre_jugador_ingresado)
+        clave1 = "nombre"    
+        lista_aux_4 = buscar_valores(lista_jugadores, nombre_jugador_ingresado, clave1)
 
-    if(respuesta == 5):
-        acumulador = 0
-        promedio = 0
-        for diccionario in lista:
-            for clave,valor in diccionario["estadisticas"].items():
-                if(clave == "promedio_puntos_por_partido"):
-                    acumulador += valor
-        promedio = acumulador / len(lista)
-        promedio = round(promedio, 2)
-        print(promedio)
+        for jugador in lista_aux_4:
+            print("\nJugador: {0}".format(jugador["nombre"]))
+            print("Logros:")
+            for elementos in jugador["logros"]:
+                print("-{0}".format(elementos))
 
-    if(respuesta == 7):
-        patron1 = "estadisticas"
-        patron2 = "rebotes_totales"
-        respuesta = mayor_cantidad(lista, patron1, patron2)
-        print("El jugador es: {0}\tRebotes totales: {1}".format(lista[respuesta]["nombre"], lista[respuesta][patron1][patron2]))
+
+    if(opcion == 5):
+        clave1 = "estadisticas"
+        clave2 = "promedio_puntos_por_partido"
+        promedio = calculador_promedio(lista_jugadores, clave1, clave2)
+        lista_jugadores_ordenada = ordenador_ascendente(lista_jugadores, clave1, clave2)
+        print("El promedio total de puntos por partido del equipo es: {0}".format(promedio))
+        for diccionario in lista_jugadores_ordenada:
+            print("{0}: \t\tPromedio: {1}".format(diccionario["nombre"].capitalize(), diccionario[clave1][clave2]))
+
+    if(opcion == 6):
+        nombre_jugador_ingresado = input("Ingrese el nombre del jugador para ver si es miembro del salon de la fama\n")
+        flag = validar_palabras(nombre_jugador_ingresado)
+        while (flag):
+            nombre_jugador_ingresado = input("Ingrese nuevamente el nombre del jugador para ver si es miembro del salon de la fama\n")
+            flag = validar_palabras(nombre_jugador_ingresado)
+        clave1 = "nombre"
+        lista_aux_6 = buscar_valores(lista_jugadores, nombre_jugador_ingresado, clave1)
+        palabra = "Miembro del Salon de la Fama del Baloncesto"
+
+        for jugador in lista_aux_6:
+                print("\nJugador: {0}".format(jugador["nombre"]))
+                for elementos in jugador["logros"]:
+                    if(palabra == elementos):
+                        print("-{0}".format(elementos))
+
+    if(opcion == 7):
+        clave1 = "estadisticas"
+        clave2 = "rebotes_totales"
+        indice = mayor_cantidad(lista_jugadores, clave1, clave2)
+        print("El jugador es: {0}\tRebotes totales: {1}".format(lista_jugadores[indice]["nombre"], lista_jugadores[indice][clave1][clave2]))
     
-    if(respuesta == 8):
-        patron1 = "estadisticas"
-        patron2 = "porcentaje_tiros_de_campo"
-        respuesta = mayor_cantidad(lista, patron1, patron2)
-        print("El jugador es: {0}\tPorcentaje de tiros de campo: %{1}".format(lista[respuesta]["nombre"], lista[respuesta][patron1][patron2]))
+    if(opcion == 8):
+        clave1 = "estadisticas"
+        clave2 = "porcentaje_tiros_de_campo"
+        indice = mayor_cantidad(lista_jugadores, clave1, clave2)
+        print("El jugador es: {0}\tPorcentaje de tiros de campo: {1}%".format(lista_jugadores[indice]["nombre"], lista_jugadores[indice][clave1][clave2]))
 
-    if(respuesta == 9):
-        patron1 = "estadisticas"
-        patron2 = "asistencias_totales"
-        respuesta = mayor_cantidad(lista, patron1, patron2)
-        print("El jugador es: {0}\tAsistencias totales: {1}".format(lista[respuesta]["nombre"], lista[respuesta][patron1][patron2]))
+    if(opcion == 9):
+        clave1 = "estadisticas"
+        clave2 = "asistencias_totales"
+        indice = mayor_cantidad(lista_jugadores, clave1, clave2)
+        print("El jugador es: {0}\tAsistencias totales: {1}".format(lista_jugadores[indice]["nombre"], lista_jugadores[indice][clave1][clave2]))
 
-    if(respuesta == 10):
+    if(opcion == 10):
         numero = input("Ingrese un promedio\n")
+        flag = validar_0_a_100(numero)
+        while(flag):
+            numero = input("Ingrese nuevamente el promedio\n")
+            flag = validar_0_a_100(numero)
+            
         numero = float(numero)
-        patron1 = "estadisticas"
-        patron2 = "promedio_puntos_por_partido"
-        respuesta = promedio_mayor_que_valor_ingresado(numero, patron1, patron2)
+        clave1 = "estadisticas"
+        clave2 = "promedio_puntos_por_partido"
+        lista_promedios = comparador_mayor_al_valor_ingresado(lista_jugadores, numero, clave1, clave2)
         
-        for indice in respuesta:
-            print("Jugador: {0}\tPromedio: {1}".format(lista[indice]["nombre"], lista[indice][patron1][patron2]))
+        for indice in lista_promedios:
+            print("Jugador: {0}\tPromedio: {1}".format(lista_jugadores[indice]["nombre"], lista_jugadores[indice][clave1][clave2]))
     
-    if(respuesta == 11):
+    if(opcion == 11):
         numero = input("Ingrese un promedio\n")
+        flag = validar_0_a_100(numero)
+        while(flag):
+            numero = input("Ingrese nuevamente el promedio\n")
+            flag = validar_0_a_100(numero)
+            
         numero = float(numero)
-        patron1 = "estadisticas"
-        patron2 = "promedio_rebotes_por_partido"
-        respuesta = promedio_mayor_que_valor_ingresado(numero, patron1, patron2)
+        clave1 = "estadisticas"
+        clave2 = "promedio_rebotes_por_partido"
+        lista_promedios = comparador_mayor_al_valor_ingresado(lista_jugadores, numero, clave1, clave2)
         
-        for indice in respuesta:
-            print("Jugador: {0}\tPromedio: {1}".format(lista[indice]["nombre"], lista[indice][patron1][patron2]))
+        for indice in lista_promedios:
+            print("Jugador: {0}\tPromedio: {1}".format(lista_jugadores[indice]["nombre"], lista_jugadores[indice][clave1][clave2]))
     
-    if(respuesta == 12):
+    if(opcion == 12):
         numero = input("Ingrese un promedio\n")
-        numero = float(numero)
-        patron1 = "estadisticas"
-        patron2 = "promedio_asistencias_por_partido"
-        respuesta = promedio_mayor_que_valor_ingresado(numero, patron1, patron2)
+        flag = validar_0_a_100(numero)
+        while(flag):
+            numero = input("Ingrese nuevamente el promedio\n")
+            flag = validar_0_a_100(numero)
         
-        for indice in respuesta:
-            print("Jugador: {0}\tPromedio: {1}".format(lista[indice]["nombre"], lista[indice][patron1][patron2]))
+        numero = float(numero)
+        clave1 = "estadisticas"
+        clave2 = "promedio_asistencias_por_partido"
+        lista_promedios = comparador_mayor_al_valor_ingresado(lista_jugadores, numero, clave1, clave2)
+        
+        for indice in lista_promedios:
+            print("Jugador: {0}\tPromedio: {1}".format(lista_jugadores[indice]["nombre"], lista_jugadores[indice][clave1][clave2]))
 
-    if(respuesta == 13):
-        patron1 = "estadisticas"
-        patron2 = "robos_totales"
-        respuesta = mayor_cantidad(lista, patron1, patron2)
-        print("El jugador es: {0}\tRobos totales: {1}".format(lista[respuesta]["nombre"], lista[respuesta][patron1][patron2]))
+    if(opcion == 13):
+        clave1 = "estadisticas"
+        clave2 = "robos_totales"
+        indice = mayor_cantidad(lista_jugadores, clave1, clave2)
+        print("El jugador es: {0}\tRobos totales: {1}".format(lista_jugadores[indice]["nombre"], lista_jugadores[indice][clave1][clave2]))
 
-    if(respuesta == 14):
-        patron1 = "estadisticas"
-        patron2 = "bloqueos_totales"
-        respuesta = mayor_cantidad(lista, patron1, patron2)
-        print("El jugador es: {0}\tBloqueos totales: {1}".format(lista[respuesta]["nombre"], lista[respuesta][patron1][patron2]))
+    if(opcion == 14):
+        clave1 = "estadisticas"
+        clave2 = "bloqueos_totales"
+        indice = mayor_cantidad(lista_jugadores, clave1, clave2)
+        print("El jugador es: {0}\tBloqueos totales: {1}".format(lista_jugadores[indice]["nombre"], lista_jugadores[indice][clave1][clave2]))
     
-    if(respuesta == 15):
+    if(opcion == 15):
         numero = input("Ingrese un porcentaje\n")
+        flag = validar_0_a_100(numero)
+        while(flag):
+            numero = input("Ingrese nuevamente el porcentaje\n")
+            flag = validar_0_a_100(numero)
         numero = float(numero)
-        patron1 = "estadisticas"
-        patron2 = "porcentaje_tiros_libres"
-        respuesta = promedio_mayor_que_valor_ingresado(numero, patron1, patron2)
+        clave1 = "estadisticas"
+        clave2 = "porcentaje_tiros_libres"
+        lista_promedios = comparador_mayor_al_valor_ingresado(lista_jugadores, numero, clave1, clave2)
         
-        for indice in respuesta:
-            print("Jugador: {0}\t %{1}".format(lista[indice]["nombre"], lista[indice][patron1][patron2]))
+        for indice in lista_promedios:
+            print("Jugador: {0}\t %{1}".format(lista_jugadores[indice]["nombre"], lista_jugadores[indice][clave1][clave2]))
 
-    if(respuesta == 18):
+    if(opcion == 16):
+        clave1 = "estadisticas"
+        clave2 = "promedio_puntos_por_partido"
+        lista_jugadores_ordenada = ordenador_ascendente(lista_jugadores, clave1, clave2)
+        del lista_jugadores_ordenada [0]
+        promedio = calculador_promedio(lista_jugadores_ordenada, clave1, clave2)
+        print("El promedio total de puntos por partido del equipo es: {0}".format(promedio))
+        for diccionario in lista_jugadores_ordenada:
+            print("{0}: \t\tPromedio: {1}".format(diccionario["nombre"].capitalize(), diccionario[clave1][clave2]))
+
+
+    if(opcion == 18):
         numero = input("Ingrese un porcentaje\n")
+        flag = validar_0_a_100(numero)
+        while(flag):
+            numero = input("Ingrese nuevamente el porcentaje\n")
+            flag = validar_0_a_100(numero)
         numero = float(numero)
-        patron1 = "estadisticas"
-        patron2 = "porcentaje_tiros_triples"
-        respuesta = promedio_mayor_que_valor_ingresado(numero, patron1, patron2)
+        clave1 = "estadisticas"
+        clave2 = "porcentaje_tiros_triples"
+        lista_promedios = comparador_mayor_al_valor_ingresado(lista_jugadores, numero, clave1, clave2)
         
-        for indice in respuesta:
-            print("Jugador: {0}\t%{1}".format(lista[indice]["nombre"], lista[indice][patron1][patron2]))
+        for indice in lista_promedios:
+            print("Jugador: {0}\t%{1}".format(lista_jugadores[indice]["nombre"], lista_jugadores[indice][clave1][clave2]))
 
-    if(respuesta == 19):
-        patron1 = "estadisticas"
-        patron2 = "temporadas"
-        respuesta = mayor_cantidad(lista, patron1, patron2)
-        print("El jugador es: {0}\tTemporadas: {1}".format(lista[respuesta]["nombre"], lista[respuesta][patron1][patron2]))
+    if(opcion == 19):
+        clave1 = "estadisticas"
+        clave2 = "temporadas"
+        indice = mayor_cantidad(lista_jugadores, clave1, clave2)
+        print("El jugador es: {0}\tTemporadas: {1}".format(lista_jugadores[indice]["nombre"], lista_jugadores[indice][clave1][clave2]))
 
-    if(respuesta == 0):
-        flag_while = False
+    if(opcion == 20): 
+        
+        clave1 = "posicion"
+        clave2 = None
+        lista_jugadores_ordenada = ordenador_ascendente(lista_jugadores, clave1, clave2)
+        clave1 = "estadisticas"
+        clave2 = "porcentaje_tiros_de_campo"
+        numero = input("Ingrese un porcentaje\n")
+        flag = validar_0_a_100(numero)
+        while(flag):
+            numero = input("Ingrese nuevamente el porcentaje\n")
+            flag = validar_0_a_100(numero)
+        numero = float(numero)
+        lista_indices = comparador_mayor_al_valor_ingresado(lista_jugadores_ordenada, numero, clave1, clave2)
+        
+        for indice in lista_indices:
+
+            print("{0}: \t\tPosicion: {1}".format(lista_jugadores_ordenada[indice]["nombre"].capitalize(), lista_jugadores_ordenada[indice]["posicion"]))
+    
+    if(opcion == 23):
+        lista_aux_23 = ["jugador","Puntos","rebotes","asistencias","robos"]
+        lista_csv_valores_23 = []
+        clave1 = "estadisticas"
+        lista_claves2 = ["puntos_totales","rebotes_totales","asistencias_totales","robos_totales"]
+        clave3 = "nombre"
+
+        for diccionario in lista_jugadores:
+            nombre = diccionario["nombre"]     #1) hago un for que recorra los nombres 
+            lista_csv_valores_23.append("\n{0}".format(nombre))
+            for clave2 in lista_claves2:    #ordeno descendente segun la clave
+                lista_jugadores_ordenada_asc = ordenador_ascendente(lista_jugadores, clave1, clave2) 
+                lista_jugadores_ordenada_des = list(reversed(lista_jugadores_ordenada_asc))
+                
+                posicion = ranking_estadisticas(lista_jugadores_ordenada_des, clave3, nombre)     #matcheo el nombre y guardo la posicion
+                lista_csv_valores_23.append(posicion)
+            
+        #los ; excel los reconoce como salto de columna pero me deja una , escrita
+        #los \n entiende que son salto de fila pero me deja una , escrita
+        
+        generar_archivo_csv("Para el examen\{0}.csv".format("Bonus"), lista_csv_valores_23, lista_aux_23)
+
+        #print(lista_csv_valores_23)
+            
+
+    if(opcion == 0):
+        flag_while_menu = False
+
+
+  
+    
+     
